@@ -134,8 +134,8 @@ Sub AnalyzeStocks()
             .Range("O3") = "Greatest % Decrease"
             .Range("O4") = "Greatest Total Volume"
 
-            Dim maxPercentIncrease, maxPercentDecrease
-            Dim maxTotalVolume
+            Dim maxPercentIncrease, maxPercentDecrease, maxTotalVolume, whatToFind, tickerValue
+            Dim findCellValue As Range
             
             maxPercentIncrease = Application.WorksheetFunction.Max(.Range("K2:K" & Rows.Count))
             .Range("Q2").NumberFormat = "0.00%"
@@ -143,28 +143,44 @@ Sub AnalyzeStocks()
             
             maxPercentDecrease = Application.WorksheetFunction.Min(.Range("K2:K" & Rows.Count))
             .Range("Q3").NumberFormat = "0.00%"
-            .Range("Q3") = ssmaxPercentDecrease
+            .Range("Q3") = maxPercentDecrease
             
             maxTotalVolume = Application.WorksheetFunction.Max(.Range("L2:L" & Rows.Count))
             .Range("Q4").NumberFormat = "#,##0"
             .Range("Q4") = maxTotalVolume
             
-            Dim findCellValue As Range
-            Dim whatToFind, tickerValue
-            
             whatToFind = FormatPercent(maxPercentIncrease, 2)
             
-            Set findCellValue = .Range("I2:K" & Rows.Count).Find(What:=whatToFind)
+            Set findCellValue = .Range("I2:K" & Rows.Count).Find(whatToFind, LookIn:=xlValues)
             If Not findCellValue Is Nothing Then
-                MsgBox (whatToFind & " found in row: " & findCellValue.row)
-                tickerValue = .Cells(fissndCellValue.row, 9)
+                tickerValue = .Cells(findCellValue.row, 9)
                 .Range("P2").Value = tickerValue
             Else
-                MsgBox (whatToFind & " not found")
+                .Range("P2").Value = tickerValue
+            End If
+            
+            whatToFind = FormatPercent(maxPercentDecrease, 2)
+            
+            Set findCellValue = .Range("I2:K" & Rows.Count).Find(whatToFind, LookIn:=xlValues)
+            If Not findCellValue Is Nothing Then
+                tickerValue = .Cells(findCellValue.row, 9)
+                .Range("P3").Value = tickerValue
+            Else
+                .Range("P3").Value = tickerValue
+            End If
+            
+            whatToFind = Format(maxTotalVolume, "#,##0")
+             
+            Set findCellValue = .Range("I2:L" & Rows.Count).Find(whatToFind, LookIn:=xlValues)
+            If Not findCellValue Is Nothing Then
+                tickerValue = .Cells(findCellValue.row, 9)
+                .Range("P4").Value = tickerValue
+            Else
+                .Range("P4").Value = tickerValue
             End If
             
             ' Message box that prints number of stocks processed on each worksheet for debugging purposes
-            MsgBox ("Completed processing" + Str(lastRow - 1) + " stocks on worksheet: " + .Name)
+            ' MsgBox ("Completed processing" + Str(lastRow - 1) + " stocks on worksheet: " + .Name)
 
         End With
 
