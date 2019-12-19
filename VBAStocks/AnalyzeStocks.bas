@@ -57,10 +57,10 @@ Sub AnalyzeStocks()
 
             ' Populate the summary table headers in columns I, J, K, L on each worksheet
             ' Set the initial row index for the summary table to 2 since we are displaying stock information from rows 2 and below
-            .Range("I1") = "Ticker"
-            .Range("J1") = "Yearly Change"
-            .Range("K1") = "Percent Change"
-            .Range("L1") = "Total Stock Volume"
+            .Range("I1").Value = "Ticker"
+            .Range("J1").Value = "Yearly Change"
+            .Range("K1").Value = "Percent Change"
+            .Range("L1").Value = "Total Stock Volume"
             summaryRowIndex = 2
 
             ' Iterate through all of the stock rows in the current worksheet
@@ -125,6 +125,43 @@ Sub AnalyzeStocks()
          
             ' Calls the sub-routine that applies conditional formatting on the Yearly Change column
             Call ApplyConditionalFormatting(curr_worksheet)
+
+            ' Populate additional summary table headers and row labels on each worksheet
+            ' This table displays tickers with the Greatest % increase, Greatest % Decrease and Greatest total volume of stocks
+            .Range("P1") = "Ticker"
+            .Range("Q1") = "Value"
+            .Range("O2") = "Greatest % Increase"
+            .Range("O3") = "Greatest % Decrease"
+            .Range("O4") = "Greatest Total Volume"
+
+            Dim maxPercentIncrease, maxPercentDecrease
+            Dim maxTotalVolume
+            
+            maxPercentIncrease = Application.WorksheetFunction.Max(.Range("K2:K" & Rows.Count))
+            .Range("Q2").NumberFormat = "0.00%"
+            .Range("Q2") = maxPercentIncrease
+            
+            maxPercentDecrease = Application.WorksheetFunction.Min(.Range("K2:K" & Rows.Count))
+            .Range("Q3").NumberFormat = "0.00%"
+            .Range("Q3") = ssmaxPercentDecrease
+            
+            maxTotalVolume = Application.WorksheetFunction.Max(.Range("L2:L" & Rows.Count))
+            .Range("Q4").NumberFormat = "#,##0"
+            .Range("Q4") = maxTotalVolume
+            
+            Dim findCellValue As Range
+            Dim whatToFind, tickerValue
+            
+            whatToFind = FormatPercent(maxPercentIncrease, 2)
+            
+            Set findCellValue = .Range("I2:K" & Rows.Count).Find(What:=whatToFind)
+            If Not findCellValue Is Nothing Then
+                MsgBox (whatToFind & " found in row: " & findCellValue.row)
+                tickerValue = .Cells(fissndCellValue.row, 9)
+                .Range("P2").Value = tickerValue
+            Else
+                MsgBox (whatToFind & " not found")
+            End If
             
             ' Message box that prints number of stocks processed on each worksheet for debugging purposes
             MsgBox ("Completed processing" + Str(lastRow - 1) + " stocks on worksheet: " + .Name)
