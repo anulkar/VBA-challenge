@@ -10,7 +10,7 @@ Sub AnalyzeStocks()
 ' 2) Conditionally format the data
 
 ' It performs the following functions:
-' 1) Loops through all the stocks for a given year in each worksheet
+' 1) Loops through all the stocks for a given ayear in each worksheet
 ' 2) Computes and displays the following summary information for each stock, within each worksheet:
 '    * Ticker Symbol
 '    * Yearly Price Change
@@ -87,7 +87,7 @@ Sub AnalyzeStocks()
                     yearlyChange = closingPrice - openingPrice
                     
                     ' Compute the percent change in price only if the opening price and yearly change is not 0
-                    ' This covers for any divide by zero errors in the percent calculation below
+                    ' This validation covers for any divide by zero errors in the percent change calculation
                     If (openingPrice <> 0) And (yearlyChange <> 0) Then
                         
                         percentChange = (closingPrice - openingPrice) / openingPrice
@@ -122,20 +122,46 @@ Sub AnalyzeStocks()
                 End If
 
             Next row
-        
-            MsgBox ("Completed processing worksheet: " + .Name)
+         
+            ' Calls the sub-routine that applies conditional formatting on the Yearly Change column
+            Call ApplyConditionalFormatting(curr_worksheet)
             
-            ' Call ApplyConditionalFormatting
+            ' Message box that prints number of stocks processed on each worksheet for debugging purposes
+            MsgBox ("Completed processing" + Str(lastRow - 1) + " stocks on worksheet: " + .Name)
+
         End With
 
     Next curr_worksheet
 
 End Sub
 
-Sub ApplyConditionalFormatting()
+Sub ApplyConditionalFormatting(ws As Worksheet)
 
-' This Sub applies conditional formatting to the Yearly Change column in all worksheets
+' This sub-routine applies conditional formatting to the Yearly Change column in all worksheets
+    
+    ' Define the Range object for the yearl change column
+    Dim yearlyChangeRange As Range
+    
+    ' Define the conditional format objects for positive and negative yearly changes in price
+    Dim positiveChangeFormat, negativeChangeFormat As FormatCondition
+    
+    ' Set the range from cell J2 and down the column
+    Set yearlyChangeRange = ws.Range("J2", ws.Range("J2").End(xlDown))
+    
+    With yearlyChangeRange
+        
+        ' Clear any existing conditional formatting
+        .FormatConditions.Delete
 
-    Columns("J:J").Select
+        ' Define the rule for each conditional format
+        Set positiveChangeFormat = .FormatConditions.Add(xlCellValue, xlGreaterEqual, "=0")
+        Set negativeChangeFormat = .FormatConditions.Add(xlCellValue, xlLess, "=0")
+        
+        ' Define the format applied for each conditional format
+        ' Highlight positive change in green and negative change in red
+        positiveChangeFormat.Interior.Color = vbGreen
+        negativeChangeFormat.Interior.Color = vbRed
+       
+    End With
 
 End Sub
